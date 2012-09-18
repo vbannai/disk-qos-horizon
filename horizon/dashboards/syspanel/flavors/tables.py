@@ -45,6 +45,7 @@ class FlavorsTable(tables.DataTable):
     ephemeral = tables.Column('OS-FLV-EXT-DATA:ephemeral',
                               verbose_name=_('Ephemeral Disk'))
     flavor_id = tables.Column('id', verbose_name=('ID'))
+    extra_specs = tables.Column('extra_specs', verbose_name=('Extra Specs'))
 
     class Meta:
         name = "flavors"

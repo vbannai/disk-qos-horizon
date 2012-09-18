@@ -37,6 +37,7 @@ class CreateFlavor(forms.SelfHandlingForm):
     memory_mb = forms.IntegerField(label=_("RAM MB"))
     disk_gb = forms.IntegerField(label=_("Root Disk GB"))
     eph_gb = forms.IntegerField(label=_("Ephemeral Disk GB"))
+    extra_specs = forms.CharField(max_length="50", label=_("Extra Specs"))
 
     def _get_new_flavor_id(self):
         # TODO(gabriel): Get rid of this hack after flavor
@@ -55,6 +56,12 @@ class CreateFlavor(forms.SelfHandlingForm):
         return flavor_id
 
     def handle(self, request, data):
+        if data['extra_specs']:
+            extraspecs = dict(u.split(":") 
+                              for u in data['extra_specs'].split(","))
+        else:
+            extraspecs = None
+                
         try:
             flavor = api.nova.flavor_create(request,
                                             data['name'],
@@ -62,7 +69,8 @@ class CreateFlavor(forms.SelfHandlingForm):
                                             data['vcpus'],
                                             data['disk_gb'],
                                             self._get_new_flavor_id(),
-                                            ephemeral=data['eph_gb'])
+                                            ephemeral=data['eph_gb'],
+                                            extra_specs=extraspecs)
             msg = _('Created flavor "%s".') % data['name']
             messages.success(request, msg)
             return flavor
@@ -74,6 +82,12 @@ class EditFlavor(CreateFlavor):
     flavor_id = forms.IntegerField(widget=forms.widgets.HiddenInput)
 
     def handle(self, request, data):
+        if data['extra_specs']:
+            extraspecs = dict(u.split(":") 
+                              for u in data['extra_specs'].split(","))
+        else:
+            extraspecs = None
+                
         try:
             # First mark the existing flavor as deleted.
             api.nova.flavor_delete(request, data['flavor_id'])
@@ -86,8 +100,8 @@ class EditFlavor(CreateFlavor):
                                             data['memory_mb'],
                                             data['vcpus'],
                                             data['disk_gb'],
-                                            self._get_new_flavor_id(),
-                                            ephemeral=data['eph_gb'])
+                                            ephemeral=data['eph_gb'],
+                                            extra_specs=extraspecs)
             msg = _('Updated flavor "%s".') % data['name']
             messages.success(request, msg)
             return flavor
