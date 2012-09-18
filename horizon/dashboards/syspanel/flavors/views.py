@@ -46,6 +46,9 @@ class IndexView(tables.DataTableView):
         except:
             exceptions.handle(request,
                               _('Unable to retrieve flavor list.'))
+        for flavor in flavors:
+           flavor.extra_specs  = flavor.get_keys()
+
         # Sort flavors by size
         flavors.sort(key=lambda f: (f.vcpus, f.ram, f.disk))
         return flavors
@@ -73,9 +76,11 @@ class EditView(forms.ModalFormView):
         except:
             exceptions.handle(self.request,
                               _("Unable to retrieve flavor data."))
+        extra_specs = flavor.get_keys()
         return {'flavor_id': flavor.id,
                 'name': flavor.name,
                 'vcpus': flavor.vcpus,
                 'memory_mb': flavor.ram,
                 'disk_gb': flavor.disk,
-                'eph_gb': getattr(flavor, 'OS-FLV-EXT-DATA:ephemeral', None)}
+                'eph_gb': getattr(flavor, 'OS-FLV-EXT-DATA:ephemeral', None),
+                'extra_specs' : extra_specs}
