@@ -13,6 +13,9 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.mox.StubOutWithMock(api.nova, 'flavor_list')
         self.mox.StubOutWithMock(api.nova, 'flavor_create')
 
+        import pdb
+        pdb.set_trace()
+
         # no pre-existing flavors
         api.nova.flavor_list(IsA(http.HttpRequest)).AndReturn([])
         api.nova.flavor_create(IsA(http.HttpRequest),
